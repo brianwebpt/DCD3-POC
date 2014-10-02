@@ -112,6 +112,9 @@ function render(response) {
         return d.referralCount;
     });
 
+    var activePatientCounts = sourceDim.group().reduceSum(dc.pluck('active_patients'));
+    var dischargedPatientCounts = sourceDim.group().reduceSum(dc.pluck('discharged_patients'));
+
     // Prepare dimension groups for composite chart
     var clinicIdsByReferralCount = clinicIdDim.group().reduceSum(function (d) {
         return d.referralCount;
@@ -240,6 +243,14 @@ function render(response) {
         .data(function(d) {return d.order(function (d){return d.referralCount;}).top(10)})
         .ordering(function(d){return d.sourceId;});
 
+    var patientStatusPieChart = dc.pieChart("#chart-pie-patient-status");
+    patientStatusPieChart
+        .width(150).height(150)
+        .dimension(sourceDim)
+        .group(activePatientCounts)
+//        .on('filtered', anyFilterChangedHandler)
+        .innerRadius(0);
+
     referralsBarChart = dc.barChart("#chart-bar-referrals-totals")
     referralsBarChart.width(990)
         .height(60)
@@ -301,7 +312,7 @@ function render(response) {
         .yAxisLabel("Referral Counts")
         .elasticY(true)
         .renderHorizontalGridLines(true)
-        .legend(dc.legend().x(60).y(10).itemHeight(13).gap(5))
+        .legend(dc.legend().x(840).y(10).itemHeight(13).gap(5))
         .brushOn(false)
         .title(function (d) {
             return "Active: " + d.value.activePatients + "\n" +
