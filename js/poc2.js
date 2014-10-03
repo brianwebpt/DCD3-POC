@@ -137,8 +137,12 @@ function render(response) {
     });
     var statusCount = statusTypeDim.group().reduceSum(function (d) {
 //        debugger;
-        console.log(d.statusCount)
-        return d.statusCount;
+//        console.log(d.statusCount)
+//        return d.statusCount;
+        if (d.statusType === 'active')
+            return d.active_patients;
+
+        return d.discharged_patients;
     });
 
     var referralCounts = dateDim.group().reduceSum(function (d) {
