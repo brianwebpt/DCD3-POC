@@ -85,6 +85,7 @@ function render(response) {
     referralData.forEach(function (d) {
         d.orderByDate =  d.date;
         d.date = new Date(d.date).getTime();
+//        console.log("status count: " + d.statusCount);
     });
 
     var dateDim = ndx.dimension(function (d) {
@@ -108,10 +109,18 @@ function render(response) {
     });
     var sourceTotal = sourceDim.group().reduceSum(dc.pluck('referralCount'));
 
+    var statusTypeDim = ndx.dimension(function (d) {
+        return d.statusType;
+    });
+    var statusCount = statusTypeDim.group().reduceSum(function (d) {
+//        debugger;
+        console.log(d.statusCount)
+        return d.statusCount;
+    });
+
     var referralCounts = dateDim.group().reduceSum(function (d) {
         return d.referralCount;
     });
-
     // Prepare dimension groups for composite chart
     var clinicIdsByReferralCount = clinicIdDim.group().reduceSum(function (d) {
         return d.referralCount;
@@ -239,6 +248,17 @@ function render(response) {
         .innerRadius(0)
         .data(function(d) {return d.order(function (d){return d.referralCount;}).top(10)})
         .ordering(function(d){return d.sourceId;});
+
+    var patientStatusPieChart = dc.pieChart("#chart-pie-patient-status");
+    patientStatusPieChart
+        .width(150).height(150)
+        .dimension(statusTypeDim)
+        .group(statusCount)
+        .on('filtered', anyFilterChangedHandler)
+        .innerRadius(0);
+//.data(function(d) {return d.order(function (d){return d.referralCount;}).top(10)})
+//        .ordering(function(d){return d.sourceId;});
+
 
     referralsBarChart = dc.barChart("#chart-bar-referrals-totals")
     referralsBarChart.width(990)

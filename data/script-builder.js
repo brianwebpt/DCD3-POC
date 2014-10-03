@@ -58,8 +58,36 @@ function createReferralSourceDataRecord(year, month, sourceId) {
     return record;
 }
 
+function createReferralSourceIncludeStatusDataRecord(year, month, sourceId, statusType) {
+    // todo:  ensure all sourceId's associate to their respective "single" typeId
+    var record = new Object();
+    record.date = new Date(year, month, Math.floor(Math.random() * 28), 0, 0, 0, 0);
+    record.facilityId = Math.floor(Math.random() * facilities.length);
+    record.sourceId = sourceId;
+    record.typeId = sourceTypes[record.sourceId];
+
+    record.statusType = statusType;
+    record.statusCount = Math.floor(Math.random() * 5) + 20;
+
+    record.active_patients = Math.floor(Math.random() * 5) + 20;
+    record.discharged_patients = Math.floor(Math.random() * 5) + 20;
+    record.not_yet_seen = Math.floor(Math.random() * 5) + 20;
+//    record.active_patients = Math.floor(Math.random() * 100);
+//    record.discharged_patients = Math.floor(Math.random() * 100);
+//    record.not_yet_seen = Math.floor(Math.random() * 100);
+    record.referralCount = record.active_patients +
+        record.discharged_patients +
+        record.not_yet_seen;
+    record.shrinkage = 25.67;
+    return record;
+}
+
 function createReferralDataRecord(year, month) {
     return createReferralSourceDataRecord(year, month, Math.floor(Math.random() * sourceCount));
+}
+
+function createReferralIncludeStatusDataRecord(year, month, statusType) {
+    return createReferralSourceIncludeStatusDataRecord(year, month, Math.floor(Math.random() * sourceCount), statusType);
 }
 
 function createReferralDataFile() {
@@ -83,6 +111,35 @@ function createReferralDataFile() {
     }
 
     wstream.write(JSON.stringify(createReferralDataRecord(yearEnd + 1, today.getMonth())) + '\n');
+
+    wstream.write(']\n');
+    wstream.end();
+}
+
+function createReferralIncludeStatusDataFile() {
+    var wstream = fs.createWriteStream(referralDataFilename);
+    wstream.write('[\n');
+
+    wstream.write(JSON.stringify(createReferralDataRecord(yearStart-1, today.getMonth())) + ',\n');
+
+    var generateMonthlyReferralCount = monthlyReferralCount/(yearEnd-yearStart+1);
+    for (var year=yearStart; year<=yearEnd; year++) {
+        generateMonthlyReferralCount += monthlyReferralCount/(yearEnd-yearStart+1);
+        for (var month=0; month<12; month++) {
+            for (var i=0; i<generateMonthlyReferralCount; i++) {
+//                for (var i=0; i<Math.floor(Math.random() * generateMonthlyReferralCount); i++) {
+                wstream.write(JSON.stringify(createReferralIncludeStatusDataRecord(year, month, 'active')) + ',\n');
+                wstream.write(JSON.stringify(createReferralIncludeStatusDataRecord(year, month, 'discharged')) + ',\n');
+            }
+            for (var i=0; i<1; i++) {
+                wstream.write(JSON.stringify(createReferralSourceIncludeStatusDataRecord(year, month, 0, 'active')) + ',\n');
+                wstream.write(JSON.stringify(createReferralSourceIncludeStatusDataRecord(year, month, 0, 'discharged')) + ',\n');
+            }
+        }
+    }
+
+    wstream.write(JSON.stringify(createReferralIncludeStatusDataRecord(yearEnd + 1, today.getMonth(), 'active')) + ',\n');
+    wstream.write(JSON.stringify(createReferralIncludeStatusDataRecord(yearEnd + 1, today.getMonth(), 'discharged')) + '\n');
 
     wstream.write(']\n');
     wstream.end();
@@ -128,5 +185,6 @@ function createReferralDimensionsDataFile() {
 }
 
 initialize();
-createReferralDataFile();
+createReferralIncludeStatusDataFile();
+//createReferralDataFile();
 createReferralDimensionsDataFile();
