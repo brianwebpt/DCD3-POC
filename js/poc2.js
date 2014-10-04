@@ -98,14 +98,21 @@ function render(response) {
 
     // Parse JSON string into object
     referralData = JSON.parse(response);
+    if (referralData.status != "success") {
+        if ("message" in referralData.data) {
+            alert(referralData.message);
+        }
+        else {
+            alert("Unknown error parsing data!");
+        }
+        return;
+    }
 
-    dataTranslation(dimensionData, referralData);
+    dataTranslation(dimensionData, referralData.data);
 
+    var ndx = crossfilter(referralData.data);
 
-
-    var ndx = crossfilter(referralData);
-
-    referralData.forEach(function (d) {
+    referralData.data.forEach(function (d) {
         d.orderByDate =  d.date;
         d.date = new Date(d.date).getTime();
 //        console.log("status count: " + d.statusCount);

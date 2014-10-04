@@ -78,7 +78,7 @@ function createReferralSourceIncludeStatusDataRecord(year, month, sourceId, stat
     record.typeId = sourceTypes[record.sourceId];
 
     record.statusType = statusType;
-    record.statusCount = Math.floor(Math.random() * 5) + 20;s
+//    record.statusCount = Math.floor(Math.random() * 5) + 20;
 
     record.active_patients = 0;
     record.discharged_patients = 0;
@@ -110,7 +110,7 @@ function createReferralIncludeStatusDataRecord(year, month, statusType, generate
 
 function createReferralDataFile() {
     var wstream = fs.createWriteStream(referralDataFilename);
-    wstream.write('[\n');
+    wstream.write('{\n"status": "success",\n"data": [\n');
 
     wstream.write(JSON.stringify(createReferralDataRecord(yearStart-1, today.getMonth())) + ',\n');
 
@@ -130,13 +130,13 @@ function createReferralDataFile() {
 
     wstream.write(JSON.stringify(createReferralDataRecord(yearEnd + 1, today.getMonth())) + '\n');
 
-    wstream.write(']\n');
+    wstream.write(']}\n');
     wstream.end();
 }
 
 function createReferralIncludeStatusDataFile() {
     var wstream = fs.createWriteStream(referralDataFilename);
-    wstream.write('[\n');
+    wstream.write('{\n"status": "success",\n"data": [\n');
 
     wstream.write(JSON.stringify(createReferralDataRecord(yearStart-1, today.getMonth())) + ',\n');
 
@@ -159,7 +159,7 @@ function createReferralIncludeStatusDataFile() {
     wstream.write(JSON.stringify(createReferralIncludeStatusDataRecord(yearEnd + 1, today.getMonth(), 'active', true, false)) + ',\n');
     wstream.write(JSON.stringify(createReferralIncludeStatusDataRecord(yearEnd + 1, today.getMonth(), 'discharged', false, true)) + '\n');
 
-    wstream.write(']\n');
+    wstream.write(']}\n');
     wstream.end();
 }
 
